@@ -18,7 +18,9 @@ void render();
 void window_loop();
 void cleanup();
 
-int main(void)
+#undef main
+
+int main(int argc, char ** argv)
 {
 	create_window();
 	load_shaders();
@@ -83,7 +85,7 @@ void load_shaders()
 			if (logSize > 0) {
 				char * log = malloc(logSize + 1);
 				glGetShaderInfoLog(vsid, logSize, NULL, log);
-				log[logSize - 1] = 0;
+				log[logSize] = 0;
 
 				printf("%s\n", log);
 			}
@@ -123,7 +125,7 @@ void load_shaders()
 			if (logSize > 0) {
 				char * log = malloc(logSize + 1);
 				glGetShaderInfoLog(fsid, logSize, NULL, log);
-				log[logSize - 1] = 0;
+				log[logSize] = 0;
 
 				printf("%s\n", log);
 			}
@@ -151,7 +153,7 @@ void load_shaders()
 		if (logSize) {
 			char * log = malloc(logSize + 1);
 			glGetProgramInfoLog(id, logSize, NULL, log);
-			log[logSize - 1] = 0;
+			log[logSize] = 0;
 
 			printf("%s\n", log);
 		}
@@ -165,7 +167,7 @@ void load_shaders()
 	char * s[6];
 
 	for(int i = 0; i < 6; i++) {
-		s[i] = malloc(20);
+		s[i] = malloc(23);
 		assert(s[i]);
 	}
 
