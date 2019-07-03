@@ -210,56 +210,47 @@ void create_gl_state()
 	int i = 0;
 
 	glUniform1i(uniformHandles[i*6+0], 1);
-	glUniform3f(uniformHandles[i*6+1], 0, 0, -10);
-	glUniform1f(uniformHandles[i*6+2], 3.0f);
-	glUniform3f(uniformHandles[i*6+3], 0, 1, 1);
+	glUniform3f(uniformHandles[i*6+1], 0, -1, -10);
+	glUniform1f(uniformHandles[i*6+2], 1.0f);
+	glUniform3f(uniformHandles[i*6+3], 0.1f, 1, 0.1f);
 
 	i = 1;
 
 	glUniform1i(uniformHandles[i*6+0], 2);
-	glUniform3f(uniformHandles[i*6+1], 0, 3, 0);
-	glUniform1f(uniformHandles[i*6+2], 4);
-	glUniform3f(uniformHandles[i*6+3], 10, 10, 10);
-	glUniform1f(uniformHandles[i*6+4], 1);
+	glUniform3f(uniformHandles[i*6+1], 5, 5, -10);
+	glUniform1f(uniformHandles[i*6+2], 0.1f);
+	glUniform3f(uniformHandles[i*6+3], 0.1, 0.0945f, 0.0788f);
+	glUniform1f(uniformHandles[i*6+4], 0.01f);
 
 
 	i = 2;
 
 	glUniform1i(uniformHandles[i*6+0], 3);
-	glUniform3f(uniformHandles[i*6+1], 0, -3, 0);
-	glUniform1f(uniformHandles[i*6+2], 20);
-	glUniform3f(uniformHandles[i*6+3], 0.5f, 0.5f, 0.5f);
+	glUniform3f(uniformHandles[i*6+1], 0, -2, 0);
+	glUniform1f(uniformHandles[i*6+2], 0);
+	glUniform3f(uniformHandles[i*6+3], 0.8f, 0.8f, 0.8f);
 	glUniform3f(uniformHandles[i*6+5], 0, 1, 0);
 
 	i = 3;
-	glUniform1i(uniformHandles[i*6+0], 1);
-	glUniform3f(uniformHandles[i*6+1], 0, 1.3f, -5);
-	glUniform1f(uniformHandles[i*6+2], 0.1f);
-	glUniform3f(uniformHandles[i*6+3], 1, 0, 0);
+
+	glUniform1i(uniformHandles[i * 6 + 0], 1);
+	glUniform3f(uniformHandles[i * 6 + 1], -2, -1, -10);
+	glUniform1f(uniformHandles[i * 6 + 2], 1.0f);
+	glUniform3f(uniformHandles[i * 6 + 3], 1, 0.1f, 0.1f);
 
 	i = 4;
-	glUniform1i(uniformHandles[i*6+0], 1);
-	glUniform3f(uniformHandles[i*6+1], 0.5f, -0.5f, -2);
-	glUniform1f(uniformHandles[i*6+2], 0.5f);
-	glUniform3f(uniformHandles[i*6+3], 1, 1, 0);
 
-	i = 5;
-	glUniform1i(uniformHandles[i*6+0], 1);
-	glUniform3f(uniformHandles[i*6+1], -1, -0.5f, -5);
-	glUniform1f(uniformHandles[i*6+2], 0.05f);
-	glUniform3f(uniformHandles[i*6+3], 1, 1, 0);
+	glUniform1i(uniformHandles[i * 6 + 0], 1);
+	glUniform3f(uniformHandles[i * 6 + 1], 2, -1, -10);
+	glUniform1f(uniformHandles[i * 6 + 2], 1.0f);
+	glUniform3f(uniformHandles[i * 6 + 3], 0.1f, 0.1f, 1);
 
-	i = 6;
-	glUniform1i(uniformHandles[i*6+0], 1);
-	glUniform3f(uniformHandles[i*6+1], 0, -0.13f, -0.11f);
-	glUniform1f(uniformHandles[i*6+2], 0.1f);
-	glUniform3f(uniformHandles[i*6+3], 1, 1, 1);
+	/*i = 5;
 
-	i = 7;
-	glUniform1i(uniformHandles[i*6+0], 1);
-	glUniform3f(uniformHandles[i*6+1], 10, 5, -30);
-	glUniform1f(uniformHandles[i*6+2], 1);
-	glUniform3f(uniformHandles[i*6+3], 1, 1, 1);
+	glUniform1i(uniformHandles[i * 6 + 0], 1);
+	glUniform3f(uniformHandles[i * 6 + 1], 200, 8, -500);
+	glUniform1f(uniformHandles[i * 6 + 2], 10.0f);
+	glUniform3f(uniformHandles[i * 6 + 3], 1, 0.1f, 0.1f);*/
 
 
 	assert(!glGetError());

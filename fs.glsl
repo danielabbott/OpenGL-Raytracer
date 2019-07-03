@@ -1,16 +1,9 @@
-#version 100
+#version 120
 
 #define MSAA
 //#define HIGHLIGHT_EDGES
-#define FSAA
 
 #ifdef HIGHLIGHT_EDGES
-#ifndef MSAA
-#define MSAA
-#endif
-#endif
-
-#ifdef FSAA
 #ifndef MSAA
 #define MSAA
 #endif
@@ -19,6 +12,13 @@
 #ifdef GL_ES
 precision mediump float;
 #endif
+
+const vec3 ambientColour = vec3(0.05, 1.0, 1.0);
+const float ambientIntensity = 0.3;
+
+const float bounceLightDistance = 10.0;
+const float bounceLightIntensity = 0.0001;
+const float bounceLightAttenuation = 0.1;
 
 uniform vec2 windowDimensions;
 
@@ -34,6 +34,7 @@ struct Object {
 };
 
 uniform Object objects[10];
+
 
 /* Window coordinates (in pixels) */
 varying vec2 pass_position;
@@ -186,37 +187,112 @@ vec3 calulate_normal(Object object, vec3 position)
 	}
 }
 
-vec3 apply_lights(vec3 position, Object object, vec3 normal)
+vec3 apply_direct_lights(vec3 position, Object object, vec3 normal)
 {
-	vec3 finalColour = vec3(0);
+	vec3 finalColour = ambientColour * ambientIntensity * object.colour;
 
 	for(int i = 0; i < 10; i++) {
 		if(objects[i].type == 2) {
-			vec3 surfaceToLight = objects[i].position - position;
+			vec3 offsets[8] = vec3[](
+				vec3(0.816497, 0.408248, 0.408248),
+				vec3(-0.816497, 0.408248, 0.408248),
+				vec3(0.816497, -0.408248, -0.408248),
+				vec3(-0.816497, -0.408248, -0.408248),
+				vec3(0.816497, 0.408248, -0.408248),
+				vec3(-0.816497, 0.408248, -0.408248),
+				vec3(0.816497, -0.408248, +0.408248),
+				vec3(-0.816497, -0.408248, +0.408248)
+			);
 
-			/* Check for objects blocking the light (casting a shadow) */
+			float totalIntensity = 0.0;
 
-			Object nearestObject;
-			float nearestObjectDistance;
+			for(int j = 0; j < 8; j++) {
+				vec3 surfaceToLight = objects[i].position + offsets[j]*objects[i].radius - position;
 
-			bool edge;
-			bool hit = get_first_intersection(position, surfaceToLight, nearestObject, nearestObjectDistance, object, edge);
+				/* Check for objects casting a shadow */
 
-			if(!hit) {
-				// Nothing is casting a shadow
+				Object nearestObject;
+				float nearestObjectDistance;
 
-				/* Calculate brightness */
+				bool edge;
+				bool hit = get_first_intersection(position, surfaceToLight, nearestObject, nearestObjectDistance, object, edge);
 
-				float intensity = dot(normal, surfaceToLight);
-				float distance = max(0.001, length(surfaceToLight));
+				if(!hit) {
+					// Nothing is casting a shadow
 
-				/* Apply colour */
+					/* Calculate brightness */
 
-				finalColour += ((objects[i].colour * object.colour * intensity) / (distance * distance* objects[i].attenuation));
+					float intensity = dot(normal, surfaceToLight);
+
+					if(intensity > 0.0) {
+						float distance = max(0.001, length(surfaceToLight));
+
+
+						totalIntensity += intensity / (distance * distance * objects[i].attenuation);
+					}
+				}
 			}
+
+			finalColour += objects[i].colour * object.colour * (totalIntensity*0.125);
 		}
 	}
+
 	return finalColour;
+}
+
+// TODO: Shadows for bounce light
+vec3 apply_bounce_light(vec3 position, Object object, vec3 normal)
+{
+	vec3 finalColour = vec3(0.0);
+
+	for(int i = 0; i < 10; i++) {
+		if(objects[i].type == 3 && objects[i] != object) {
+			/* Bounce light from plane */
+
+			vec3 surfaceToSurfce = position - objects[i].position;
+			float distanceToPlane = abs(dot(surfaceToSurfce, objects[i].normal));
+			vec3 pointOnPlane = position - objects[i].normal * distanceToPlane;
+
+			vec3 directLightOnPlane = apply_direct_lights(pointOnPlane, objects[i], objects[i].normal);
+
+			float x = max(distanceToPlane, 0.001)*bounceLightAttenuation;
+
+			float intensity = min((1.0/(x*x)) * bounceLightIntensity, 1.0);
+
+			finalColour += objects[i].colour * object.colour * directLightOnPlane * intensity;
+
+		}
+		else if(objects[i].type == 1 && objects[i] != object) {
+			/* Bounce light from sphere */
+
+			vec3 surfaceToSphereCenter = objects[i].position - position;
+			vec3 d = normalize(surfaceToSphereCenter);
+			vec3 pointOnSphere = (surfaceToSphereCenter - d*objects[i].radius);
+
+			vec3 directLightOnSphere = apply_direct_lights(pointOnSphere, objects[i], -d);
+
+			float x = max(length(surfaceToSphereCenter) - objects[i].radius, 0.01) * bounceLightAttenuation;
+
+			float intensity = min((1.0/(x*x)) * bounceLightIntensity, 1.0);
+
+			finalColour += objects[i].colour * object.colour * directLightOnSphere * intensity;
+
+		}
+	}
+
+	return finalColour;
+}
+
+vec3 do_lighting(vec3 position, Object object, vec3 normal)
+{
+	vec3 finalColour = apply_direct_lights(position, object, normal);
+	finalColour += apply_bounce_light(position, object, normal);
+	 // vec3 finalColour = apply_bounce_light(position, object, normal);
+
+	// atmospheric perspective
+
+	finalColour = mix(finalColour, ambientColour, length(position) * 0.001);
+	return finalColour;	
 }
 
 /* Returns the colour of the pixel */
@@ -242,7 +318,7 @@ vec3 castRay(vec2 pixelPosition, out bool onEdge, bool getColour)
 	
 	if(!hit) {
 		onEdge = false;
-		return vec3(0.0, 0.0, 0.0);
+		return ambientColour;
 	}
 #ifdef HIGHLIGHT_EDGES
 	else if(onEdge) {
@@ -254,7 +330,7 @@ vec3 castRay(vec2 pixelPosition, out bool onEdge, bool getColour)
 		if(getColour) {
 			vec3 position = rayDirection * nearestObjectDistance;
 			vec3 normal = calulate_normal(nearestObject, position);
-			return vec3(apply_lights(position, nearestObject, normal));
+			return vec3(do_lighting(position, nearestObject, normal));
 		}
 		else {
 			// skip lighting calculations
@@ -273,10 +349,6 @@ void main()
 #ifndef HIGHLIGHT_EDGES
 	castRay(pass_position, edge, false);
 
-	#ifdef FSAA
-	edge = true;
-	#endif
-
 	if(edge) {
 		/* Sample four more times and get the colour values this time */
 
@@ -293,7 +365,7 @@ void main()
 	} else {
 #endif
 #endif
-		/* No MSAA or FSAA, just put the colour on the screen */
+		/* No MSAA, just put the colour on the screen */
 
 		vec3 colour = castRay(pass_position, edge, true);
 
