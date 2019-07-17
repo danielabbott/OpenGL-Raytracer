@@ -17,7 +17,7 @@ const vec3 ambientColour = vec3(0.05, 1.0, 1.0);
 const float ambientIntensity = 0.3;
 
 const float bounceLightDistance = 10.0;
-const float bounceLightIntensity = 0.0001;
+const float bounceLightIntensity = 0.00001;
 const float bounceLightAttenuation = 0.1;
 
 uniform vec2 windowDimensions;
@@ -340,6 +340,14 @@ vec3 castRay(vec2 pixelPosition, out bool onEdge, bool getColour)
 
 }
 
+vec3 tonemap(vec3 trueColour) {
+	float lum = 0.2126 * trueColour.r + 0.7152 * trueColour.g + 0.0722 * trueColour.b;
+	float newLum = lum / (lum + 1.0);
+	float change = newLum / lum;
+
+	return trueColour.rgb*change;
+}
+
 /* main() is called once for every pixel on the screen */
 void main()
 {
@@ -361,7 +369,7 @@ void main()
 
 		vec3 newColour = (centralColour1 + centralColour2 + centralColour3 + centralColour4) / 4.0;
 
-		gl_FragColor = vec4(newColour, 1.0);
+		gl_FragColor = vec4(tonemap(newColour), 1.0);
 	} else {
 #endif
 #endif
@@ -369,7 +377,7 @@ void main()
 
 		vec3 colour = castRay(pass_position, edge, true);
 
-		gl_FragColor = vec4(colour, 1.0);
+		gl_FragColor = vec4(tonemap(colour), 1.0);
 
 #ifdef MSAA
 #ifndef HIGHLIGHT_EDGES

@@ -210,7 +210,7 @@ void create_gl_state()
 	int i = 0;
 
 	glUniform1i(uniformHandles[i*6+0], 1);
-	glUniform3f(uniformHandles[i*6+1], 0, -1, -10);
+	glUniform3f(uniformHandles[i*6+1], 0, -1, -15);
 	glUniform1f(uniformHandles[i*6+2], 1.0f);
 	glUniform3f(uniformHandles[i*6+3], 0.1f, 1, 0.1f);
 
@@ -219,7 +219,7 @@ void create_gl_state()
 	glUniform1i(uniformHandles[i*6+0], 2);
 	glUniform3f(uniformHandles[i*6+1], 5, 5, -10);
 	glUniform1f(uniformHandles[i*6+2], 0.1f);
-	glUniform3f(uniformHandles[i*6+3], 0.1, 0.0945f, 0.0788f);
+	glUniform3f(uniformHandles[i*6+3], 1.0, 0.945f, 0.788f);
 	glUniform1f(uniformHandles[i*6+4], 0.01f);
 
 
